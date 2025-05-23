@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
 from models import Note
 import crud, schemas
+import uvicorn
 
 app = FastAPI()
 
@@ -40,3 +41,7 @@ def update(note_id: int, note: schemas.NoteCreate, db: Session = Depends(get_db)
 def delete(note_id: int, db: Session = Depends(get_db)):
     crud.delete_note(db, note_id)
     return {"ok": True}
+
+
+if __name__=="__main__":
+    uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
