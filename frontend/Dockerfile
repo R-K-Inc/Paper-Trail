@@ -1,5 +1,5 @@
 # Use a lightweight Node.js image
-FROM node:16-alpine
+FROM node:20-alpine
 
 # Set the working directory
 WORKDIR /src
@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the port your development server runs on (e.g., 3000)
-EXPOSE 3000
+EXPOSE 5173
 
 # Start the development server
 CMD ["npm", "run", "dev"]
