@@ -2,7 +2,7 @@
 FROM node:16-alpine
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /src
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Start the development server
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
