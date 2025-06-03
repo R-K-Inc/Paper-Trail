@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function NoteForm({ onSubmit }) {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -13,10 +15,12 @@ export function NoteForm({ onSubmit }) {
 
     try {
       setLoading(true)
+      setError('')
       await onSubmit({ title: title.trim(), content: content.trim() })
       setTitle('')
       setContent('')
     } catch (error) {
+      setError('Failed to create note. Please try again.')
       console.error('Failed to create note:', error)
     } finally {
       setLoading(false)
@@ -26,6 +30,13 @@ export function NoteForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg">
       <h3 className="text-lg font-semibold">Create New Note</h3>
+      
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <Input
         placeholder="Note title..."
         value={title}
