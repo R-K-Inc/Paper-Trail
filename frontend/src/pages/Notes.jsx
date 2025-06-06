@@ -5,7 +5,7 @@ import { NoteForm } from "@/components/notes"
 import { NotesList } from "@/components/notes-list"
 import { notesApi } from "@/lib/api"
 import { Plus, RefreshCw } from "lucide-react"
-import { toast } from "sonner" // This is all you need
+import { toast } from "sonner"
 
 export default function Notes() {
     const [notes, setNotes] = useState([])

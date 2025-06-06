@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from 'lucide-react'
 import { AppLogo } from './app-logo'
-import { AppSidebar } from './app-sidebar'
 import { ModeToggle } from './mode-toggle'
 import { Button, buttonVariants } from './ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
@@ -25,7 +24,6 @@ export function AppHeader() {
         <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b">
             <div className="w-full ~max-w-7xl mx-auto flex items-center gap-2 h-14 px-4 md:px-8">
                 <div className='flex items-center gap-2 md:gap-0'>
-                    <AppSidebar />
                     <Link to="/">
                         <AppLogo />
                     </Link>
