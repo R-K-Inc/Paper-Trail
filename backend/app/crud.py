@@ -5,7 +5,7 @@ from schemas import NoteCreate
 def get_notes(db: Session):
     return db.query(Note).all()
 
-def create_node(db: Session, note: NoteCreate):
+def create_note(db: Session, note: NoteCreate):
     db_note = Note(title=note.title, content=note.content)
     db.add(db_note)
     db.commit()
