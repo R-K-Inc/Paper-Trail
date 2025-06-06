@@ -1,4 +1,4 @@
-import { setTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Moon, Sun } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import {
@@ -9,12 +9,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ModeToggle() {
-  setTheme()
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-9 px-0">
+        <Button variant="ghost" className="w-9 px-0" onClick={toggleTheme}>
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
