@@ -1,5 +1,5 @@
-import { setTheme } from '@/contexts/ThemeContext'
-import { Moon, Sun } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
+import { Moon, Sun, Check } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ModeToggle() {
-  setTheme()
+  const { theme, setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -22,12 +22,15 @@ export function ModeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme("light")}>
+          {theme === "light" && <Check className="mr-2 h-4 w-4" />}
           Light
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme("dark")}>
+          {theme === "dark" && <Check className="mr-2 h-4 w-4" />}
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme("system")}>
+          {theme === "system" && <Check className="mr-2 h-4 w-4" />}
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,14 +1,23 @@
 import { createContext, useContext, useEffect, useState } from "react"
+import PropTypes from 'prop-types'
 
 export const ThemeContext = createContext(null)
 
-export function ThemeProvider({
-    children,
-    defaultTheme = "system",
-    storageKey = "shadcn-ui-theme",
-}) {
+export function ThemeProvider(props) {
+    // Destructure inside the function body for ESLint compatibility
+    const {
+        children,
+        defaultTheme = "system",
+        storageKey = "shadcn-ui-theme",
+    } = props;
+
     const [theme, setTheme] = useState(
-        () => localStorage.getItem(storageKey) ?? defaultTheme
+        () => {
+            if (typeof window !== 'undefined') {
+                return localStorage.getItem(storageKey) ?? defaultTheme
+            }
+            return defaultTheme
+        }
     )
 
     useEffect(() => {
@@ -34,13 +43,21 @@ export function ThemeProvider({
             value={{
                 theme,
                 setTheme: (theme) => {
-                    localStorage.setItem(storageKey, theme)
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem(storageKey, theme)
+                    }
                     setTheme(theme)
                 },
             }}>
             {children}
         </ThemeContext.Provider>
     )
+}
+
+ThemeProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+    defaultTheme: PropTypes.string,
+    storageKey: PropTypes.string
 }
 
 export function useTheme() {
