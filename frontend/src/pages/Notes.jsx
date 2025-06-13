@@ -6,12 +6,14 @@ import { NotesList } from "@/components/notes-list"
 import { notesApi } from "@/lib/api"
 import { Plus, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 
 export default function Notes() {
     const [notes, setNotes] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [showCreateForm, setShowCreateForm] = useState(false)
+    const [selectedCategory, setSelectedCategory] = useState(null)
 
     useEffect(() => {
         loadNotes()
@@ -46,7 +48,7 @@ export default function Notes() {
     const handleUpdateNote = async (noteId, noteData) => {
         try {
             const response = await notesApi.updateNote(noteId, noteData)
-            setNotes(prev => prev.map(note => 
+            setNotes(prev => prev.map(note =>
                 note.id === noteId ? response.data : note
             ))
             toast.success("Note updated successfully!")
@@ -68,6 +70,14 @@ export default function Notes() {
         }
     }
 
+    // Extract unique categories
+    const categories = [...new Set(notes.map(note => note.category).filter(Boolean))]
+
+    // Filter notes by selected category
+    const filteredNotes = selectedCategory
+        ? notes.filter(note => note.category === selectedCategory)
+        : notes
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
@@ -80,7 +90,7 @@ export default function Notes() {
         <>
             <PageHeader>
                 <div className="flex items-center justify-between">
-                    <PageHeaderHeading>Notes ({notes.length})</PageHeaderHeading>
+                    <PageHeaderHeading>Notes ({filteredNotes.length})</PageHeaderHeading>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={loadNotes}>
                             <RefreshCw className="h-4 w-4 mr-2" />
@@ -92,17 +102,41 @@ export default function Notes() {
                         </Button>
                     </div>
                 </div>
+                {/* Category filter badges */}
+                {categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        {categories.map(category => (
+                            <Badge
+                                key={category}
+                                variant={selectedCategory === category ? "default" : "outline"}
+                                className="cursor-pointer"
+                                onClick={() => setSelectedCategory(category)}
+                            >
+                                {category}
+                            </Badge>
+                        ))}
+                        {selectedCategory && (
+                            <Badge
+                                variant="destructive"
+                                className="cursor-pointer ml-2"
+                                onClick={() => setSelectedCategory(null)}
+                            >
+                                Clear Filter
+                            </Badge>
+                        )}
+                    </div>
+                )}
             </PageHeader>
-            
+
             <div className="space-y-6">
                 {showCreateForm && (
-                    <NoteForm 
+                    <NoteForm
                         onSubmit={handleCreateNote}
                         onCancel={() => setShowCreateForm(false)}
                     />
                 )}
-                <NotesList 
-                    notes={notes} 
+                <NotesList
+                    notes={filteredNotes}
                     onDelete={handleDeleteNote}
                     onUpdate={handleUpdateNote}
                 />

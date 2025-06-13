@@ -9,18 +9,20 @@ import { FileText, Plus, Clock, Tag, TrendingUp } from "lucide-react"
 
 export default function Dashboard() {
     const [recentNotes, setRecentNotes] = useState([])
+    const [notes, setNotes] = useState([]) // Store all notes
     const [notesCount, setNotesCount] = useState(0)
     const [categories, setCategories] = useState([])
+    const [selectedCategory, setSelectedCategory] = useState(null) // Track selected category
 
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
                 const response = await notesApi.getNotes()
                 const notes = response.data
+                setNotes(notes)
                 setNotesCount(notes.length)
-                setRecentNotes(notes.slice(0, 5)) // Show 5 most recent
-                
-                // Get unique categories
+                setRecentNotes(notes.slice(0, 5))
+
                 const uniqueCategories = [...new Set(notes.map(note => note.category).filter(Boolean))]
                 setCategories(uniqueCategories)
             } catch (error) {
@@ -30,12 +32,17 @@ export default function Dashboard() {
         loadDashboardData()
     }, [])
 
+    // Filter notes by selected category
+    const filteredNotes = selectedCategory
+        ? notes.filter(note => note.category === selectedCategory)
+        : recentNotes
+
     const formatDate = (dateString) => {
         const date = new Date(dateString)
         const now = new Date()
         const diffTime = Math.abs(now - date)
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        
+
         if (diffDays === 1) return 'Today'
         if (diffDays === 2) return 'Yesterday'
         if (diffDays <= 7) return `${diffDays - 1} days ago`
@@ -49,7 +56,7 @@ export default function Dashboard() {
                     Dashboard
                 </PageHeaderHeading>
             </PageHeader>
-            
+
             <div className="space-y-6">
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-3">
@@ -134,9 +141,9 @@ export default function Dashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            {recentNotes.length > 0 ? (
+                            {filteredNotes.length > 0 ? (
                                 <div className="space-y-3">
-                                    {recentNotes.map(note => (
+                                    {filteredNotes.slice(0, 5).map(note => (
                                         <div key={note.id} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium truncate">{note.title}</p>
@@ -148,7 +155,11 @@ export default function Dashboard() {
                                                         {formatDate(note.created_at)}
                                                     </span>
                                                     {note.category && (
-                                                        <Badge variant="secondary" className="text-xs h-5">
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="text-xs h-5 cursor-pointer"
+                                                            onClick={() => setSelectedCategory(note.category)}
+                                                        >
                                                             {note.category}
                                                         </Badge>
                                                     )}
@@ -184,13 +195,13 @@ export default function Dashboard() {
                                     Create New Note
                                 </Link>
                             </Button>
-                            
+
                             <div className="grid grid-cols-2 gap-3">
-                                <Button asChild variant="outline" size="sm">
+                                {/* <Button asChild variant="outline" size="sm">
                                     <Link to="/pages/sample">
                                         View Sample
                                     </Link>
-                                </Button>
+                                </Button> */}
                                 <Button asChild variant="outline" size="sm">
                                     <Link to="/notes">
                                         Browse Notes
@@ -203,13 +214,27 @@ export default function Dashboard() {
                                     <p className="text-sm font-medium mb-2">Your Categories</p>
                                     <div className="flex flex-wrap gap-1">
                                         {categories.slice(0, 6).map(category => (
-                                            <Badge key={category} variant="outline" className="text-xs">
+                                            <Badge
+                                                key={category}
+                                                variant={selectedCategory === category ? "default" : "outline"}
+                                                className="text-xs cursor-pointer"
+                                                onClick={() => setSelectedCategory(category)}
+                                            >
                                                 {category}
                                             </Badge>
                                         ))}
                                         {categories.length > 6 && (
                                             <Badge variant="outline" className="text-xs">
                                                 +{categories.length - 6} more
+                                            </Badge>
+                                        )}
+                                        {selectedCategory && (
+                                            <Badge
+                                                variant="destructive"
+                                                className="text-xs cursor-pointer ml-2"
+                                                onClick={() => setSelectedCategory(null)}
+                                            >
+                                                Clear Filter
                                             </Badge>
                                         )}
                                     </div>

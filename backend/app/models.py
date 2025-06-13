@@ -10,3 +10,5 @@ class Note(Base):
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    category = Column(String, nullable=True)
+    tags = Column(String, nullable=True)
