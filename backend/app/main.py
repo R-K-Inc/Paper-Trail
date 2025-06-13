@@ -25,19 +25,19 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/notes", response_model=list[schemas.NoteOut])
+@app.get("/api/notes", response_model=list[schemas.NoteOut])
 def read_notes(db: Session = Depends(get_db)):
     return crud.get_notes(db)
 
-@app.post("/notes", response_model=schemas.NoteOut)
+@app.post("/api/notes", response_model=schemas.NoteOut)
 def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db)):
     return crud.create_note(db, note)
 
-@app.put("/notes/{note_id}", response_model=schemas.NoteOut)
+@app.put("/api/notes/{note_id}", response_model=schemas.NoteOut)
 def update(note_id: int, note: schemas.NoteCreate, db: Session = Depends(get_db)):
     return crud.update_note(db, note_id, note)
 
-@app.delete("/notes/{note_id}")
+@app.delete("/api/notes/{note_id}")
 def delete(note_id: int, db: Session = Depends(get_db)):
     crud.delete_note(db, note_id)
     return {"ok": True}
