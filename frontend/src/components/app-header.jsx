@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from 'lucide-react'
 import { AppLogo } from './app-logo'
-import { AppSidebar } from './app-sidebar'
+import { ModeToggle } from './mode-toggle'
 import { Button, buttonVariants } from './ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { appConfig, baseUrl } from '@/config/app'
@@ -21,10 +21,9 @@ export function AppHeader() {
     const location = useLocation()
 
     return (
-        <header className="bg-background sticky top-0 z-50 border-b">
+        <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b">
             <div className="w-full ~max-w-7xl mx-auto flex items-center gap-2 h-14 px-4 md:px-8">
                 <div className='flex items-center gap-2 md:gap-0'>
-                    <AppSidebar />
                     <Link to="/">
                         <AppLogo />
                     </Link>
@@ -81,7 +80,8 @@ export function AppHeader() {
                             ))}
                         </nav>
                     </div>
-                    <nav className="flex gap-1">
+                    <nav className="flex gap-1 items-center">
+                        <ModeToggle />
                         <a
                             href={appConfig.github.url}
                             title={appConfig.github.title}

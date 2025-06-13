@@ -5,7 +5,7 @@ export const ThemeContext = createContext(null)
 export function ThemeProvider({
     children,
     defaultTheme = "system",
-    storageKey = "shadcn-ui-theme",
+    storageKey = "ui-theme",
 }) {
     const [theme, setTheme] = useState(
         () => localStorage.getItem(storageKey) ?? defaultTheme
@@ -13,31 +13,33 @@ export function ThemeProvider({
 
     useEffect(() => {
         const root = window.document.documentElement
-
         root.classList.remove("light", "dark")
 
         if (theme === "system") {
-            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-                .matches
-                ? "dark"
-                : "light"
-
-            root.classList.add(systemTheme)
-            return
+            const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+            const handleChange = () => {
+                root.classList.add(mediaQuery.matches ? "dark" : "light")
+            }
+            
+            handleChange() // Initial setup
+            mediaQuery.addEventListener("change", handleChange)
+            
+            return () => mediaQuery.removeEventListener("change", handleChange)
+        } else {
+            root.classList.add(theme)
         }
-
-        root.classList.add(theme)
     }, [theme])
 
+    const value = {
+        theme,
+        setTheme: (newTheme) => {
+            localStorage.setItem(storageKey, newTheme)
+            setTheme(newTheme)
+        },
+    }
+
     return (
-        <ThemeContext.Provider
-            value={{
-                theme,
-                setTheme: (theme) => {
-                    localStorage.setItem(storageKey, theme)
-                    setTheme(theme)
-                },
-            }}>
+        <ThemeContext.Provider value={value}>
             {children}
         </ThemeContext.Provider>
     )
@@ -45,10 +47,8 @@ export function ThemeProvider({
 
 export function useTheme() {
     const context = useContext(ThemeContext)
-
     if (context === null) {
         throw new Error("useTheme must be used within a ThemeProvider")
     }
-
     return context
 }
