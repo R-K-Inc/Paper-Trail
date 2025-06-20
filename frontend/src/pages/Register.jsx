@@ -13,9 +13,21 @@ export default function Register() {
         setError("")
         try {
             await axios.post("/api/register", { username, password })
-            navigate("/login")
+            // On success, navigate to login
+            navigate("/login?registered=true")
         } catch (err) {
-            setError("Registration failed. Try a different username.")
+            // --- Improved Error Handling ---
+            if (err.response) {
+                // The server responded with an error (e.g., 400 for duplicate username)
+                setError(err.response.data.detail || "Registration failed.")
+            } else if (err.request) {
+                // The request was made but no response was received (backend crashed or is down)
+                setError("Cannot connect to the server. Please try again later.")
+            } else {
+                // Something else went wrong
+                setError("An unexpected error occurred.")
+            }
+            console.error("Registration error:", err)
         }
     }
 
@@ -23,7 +35,7 @@ export default function Register() {
         <div className="flex flex-col items-center justify-center min-h-screen">
             <form onSubmit={handleSubmit} className="bg-muted p-8 rounded shadow-md w-full max-w-sm">
                 <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
-                {error && <div className="mb-4 text-red-500">{error}</div>}
+                {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
                 <div className="mb-4">
                     <label className="block mb-1">Username</label>
                     <input

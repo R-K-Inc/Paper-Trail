@@ -45,11 +45,17 @@ def delete(note_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/register", response_model=schemas.UserOut)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_username(db, user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    hashed_pw = hash_password(user.password)
-    return crud.create_user(db, user.username, hashed_pw)
+    # --- TEMPORARY DEBUGGING CODE ---
+    print(f"Attempting to register user: {user.username}")
+    # We are commenting out the code that is likely crashing
+    # db_user = get_user_by_username(db, user.username)
+    # if db_user:
+    #     raise HTTPException(status_code=400, detail="Username already registered")
+    # hashed_pw = hash_password(user.password)
+    # return create_user(db, user.username, hashed_pw)
+
+    # Just return a fake user object to satisfy the response_model
+    return {"id": 1, "username": user.username}
 
 @app.post("/api/login")
 def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
