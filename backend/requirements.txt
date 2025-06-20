@@ -4,7 +4,5 @@ sqlalchemy
 psycopg2-binary
 pydantic
 python-dotenv
-datetime
-pytest
-typing
 passlib[bcrypt]
+pytest

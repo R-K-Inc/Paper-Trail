@@ -25,9 +25,8 @@ export function AppHeader() {
 
     // Check auth state on mount
     useEffect(() => {
-        const token = localStorage.getItem("token")
         const username = localStorage.getItem("username")
-        if (token && username) {
+        if (username) {
             setUser({ username })
         } else {
             setUser(null)
@@ -35,8 +34,15 @@ export function AppHeader() {
     }, [])
 
     // Handle logout
-    const handleLogout = () => {
-        localStorage.removeItem("token")
+    const handleLogout = async () => {
+        try {
+            await fetch(`${baseUrl}/api/logout`, {
+                method: 'POST',
+                credentials: 'include', // Sends cookies along with the request
+            })
+        } catch (error) {
+            console.error("Logout failed:", error)
+        }
         localStorage.removeItem("username")
         setUser(null)
         navigate("/login")

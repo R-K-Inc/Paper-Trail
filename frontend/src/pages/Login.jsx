@@ -1,20 +1,20 @@
 import { useState } from "react"
-import axios from "axios"
-import { Link } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
+import { Link, useNavigate } from "react-router-dom"
 
-export default function Login({ onLogin }) {
+export default function Login() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
+    const { login } = useAuth()
+    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError("")
         try {
-            const response = await axios.post("/api/login", { username, password })
-            // If your backend returns a token, save it (e.g., localStorage)
-            // localStorage.setItem("token", response.data.token)
-            if (onLogin) onLogin(response.data)
+            await login({ username, password })
+            navigate("/")
         } catch (err) {
             setError("Invalid username or password")
         }

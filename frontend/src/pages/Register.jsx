@@ -1,5 +1,5 @@
 import { useState } from "react"
-import axios from "axios"
+import { authApi } from "../lib/api"
 import { useNavigate, Link } from "react-router-dom"
 
 export default function Register() {
@@ -12,7 +12,7 @@ export default function Register() {
         e.preventDefault()
         setError("")
         try {
-            await axios.post("/api/register", { username, password })
+            await authApi.register({ username, password })
             navigate("/login")
         } catch (err) {
             setError("Registration failed. Try a different username.")

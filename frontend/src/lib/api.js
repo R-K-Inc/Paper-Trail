@@ -4,26 +4,18 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, // This is crucial for cookies
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
+// The redirect logic was causing an infinite loop.
+// The AuthContext and Router already handle unauthorized access correctly.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('authToken')
-      window.location.href = '/login'
-    }
+    // We just pass the error along.
     return Promise.reject(error)
   }
 )
@@ -38,8 +30,8 @@ export const notesApi = {
 }
 
 export const authApi = {
-  login: (credentials) => api.post('/api/auth/login', credentials),
-  register: (userData) => api.post('/api/auth/register', userData),
-  logout: () => api.post('/api/auth/logout'),
-  refreshToken: () => api.post('/api/auth/refresh')
+  login: (credentials) => api.post('/api/login', credentials),
+  register: (userData) => api.post('/api/register', userData),
+  logout: () => api.post('/api/logout'),
+  me: () => api.get('/api/me')
 }

@@ -1,61 +1,75 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { authApi } from '@/lib/api'
+import { authApi } from '../lib/api'
 
-const AuthContext = createContext({})
+const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+    const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      // Verify token validity
-      checkAuthStatus()
-    } else {
-      setLoading(false)
+    // Check if user is logged in on app start - only run once
+    useEffect(() => {
+        let isMounted = true
+        
+        const checkAuth = async () => {
+            try {
+                const response = await authApi.me()
+                if (isMounted) {
+                    setUser(response.data)
+                }
+            } catch (error) {
+                if (isMounted) {
+                    setUser(null)
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false)
+                }
+            }
+        }
+        
+        checkAuth()
+        
+        return () => {
+            isMounted = false
+        }
+    }, []) // Empty dependency array - only run once
+
+    const login = async (credentials) => {
+        const response = await authApi.login(credentials)
+        setUser(response.data.user)
+        return response
     }
-  }, [])
 
-  const checkAuthStatus = async () => {
-    try {
-      const response = await authApi.me()
-      setUser(response.data)
-    } catch (error) {
-      localStorage.removeItem('authToken')
-    } finally {
-      setLoading(false)
+    const logout = async () => {
+        try {
+            await authApi.logout()
+        } catch (error) {
+            console.error('Logout error:', error)
+        } finally {
+            setUser(null)
+        }
     }
-  }
 
-  const login = async (credentials) => {
-    const response = await authApi.login(credentials)
-    const { token, user } = response.data
-    localStorage.setItem('authToken', token)
-    setUser(user)
-    return response
-  }
-
-  const logout = async () => {
-    try {
-      await authApi.logout()
-    } finally {
-      localStorage.removeItem('authToken')
-      setUser(null)
+    const value = {
+        user,
+        login,
+        logout,
+        loading,
+        isAuthenticated: !!user
     }
-  }
 
-  return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      logout,
-      loading,
-      isAuthenticated: !!user
-    }}>
-      {children}
-    </AuthContext.Provider>
-  )
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+    const context = useContext(AuthContext)
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider')
+    }
+    return context
+}
