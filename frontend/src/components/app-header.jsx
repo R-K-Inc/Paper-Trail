@@ -1,5 +1,5 @@
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext' // Import useAuth
 import { mainMenu } from '@/config/menu'
 import { cn } from '@/lib/utils'
 import {
@@ -20,33 +20,8 @@ import GitHub from './icons/github'
 
 export function AppHeader() {
     const location = useLocation()
-    const navigate = useNavigate()
-    const [user, setUser] = useState(null)
-
-    // Check auth state on mount
-    useEffect(() => {
-        const username = localStorage.getItem("username")
-        if (username) {
-            setUser({ username })
-        } else {
-            setUser(null)
-        }
-    }, [])
-
-    // Handle logout
-    const handleLogout = async () => {
-        try {
-            await fetch(`${baseUrl}/api/logout`, {
-                method: 'POST',
-                credentials: 'include', // Sends cookies along with the request
-            })
-        } catch (error) {
-            console.error("Logout failed:", error)
-        }
-        localStorage.removeItem("username")
-        setUser(null)
-        navigate("/login")
-    }
+    // Use the AuthContext for auth state and actions
+    const { isAuthenticated, user, logout } = useAuth()
 
     return (
         <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b">
@@ -125,10 +100,11 @@ export function AppHeader() {
                             <GitHub />
                             <span className="sr-only">GitHub</span>
                         </a>
-                        {user ? (
+                        {/* --- THIS IS THE UPDATED LOGIC --- */}
+                        {isAuthenticated ? (
                             <div className="flex items-center gap-2 ml-2">
-                                <span className="font-medium text-sm">{user.username}</span>
-                                <Button variant="outline" size="sm" onClick={handleLogout}>
+                                <span className="font-medium text-sm">{user?.username}</span>
+                                <Button variant="outline" size="sm" onClick={logout}>
                                     Logout
                                 </Button>
                             </div>
