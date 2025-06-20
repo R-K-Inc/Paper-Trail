@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Note
+from models import Note, User
 from schemas import NoteCreate
 
 def get_notes(db: Session):
@@ -37,3 +37,13 @@ def delete_note(db: Session, note_id: int):
     note = db.query(Note).filter(Note.id == note_id).first()
     db.delete(note)
     db.commit()
+
+def get_user_by_username(db, username: str):
+    return db.query(User).filter(User.username == username).first()
+
+def create_user(db, username: str, hashed_password: str):
+    user = User(username=username, hashed_password=hashed_password)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
