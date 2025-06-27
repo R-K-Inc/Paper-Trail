@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from .database import SessionLocal, engine, Base
 from .models import Note, User
@@ -7,6 +9,7 @@ from . import crud, schemas
 import uvicorn
 from .auth import hash_password, verify_password
 import uuid
+import os
 
 app = FastAPI()
 
@@ -102,6 +105,27 @@ def logout(request: Request, response: Response):
 @app.get("/api/me", response_model=schemas.UserOut)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# Serve React app for all non-API routes
+@app.get("/{full_path:path}")
+async def catch_all(full_path: str):
+    # Don't serve React app for API routes
+    if full_path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    # Serve index.html for all other routes (React Router will handle routing)
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    index_file = os.path.join(static_dir, "index.html")
+    
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
+    else:
+        raise HTTPException(status_code=404, detail="Frontend not found")
 
 if __name__=="__main__":
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
