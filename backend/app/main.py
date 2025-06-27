@@ -17,7 +17,11 @@ Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",  # For local development
+        "https://paper-trail-v9yd.onrender.com", 
+        "https://*.onrender.com" 
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,6 +48,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
+# API Routes
 @app.get("/api/notes", response_model=list[schemas.NoteOut])
 def read_notes(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return crud.get_notes(db, user_id=current_user.id)
@@ -106,26 +111,35 @@ def logout(request: Request, response: Response):
 def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
 
-
+# Static file serving for React app
 static_dir = os.path.join(os.path.dirname(__file__), "static")
+
+# Serve static assets (JS, CSS, images, etc.)
 if os.path.exists(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="assets")
+
+# Health check endpoint (useful for Render)
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy"}
 
 # Serve React app for all non-API routes
 @app.get("/{full_path:path}")
-async def catch_all(full_path: str):
-    # Don't serve React app for API routes
+async def serve_react_app(full_path: str):
+    # Don't interfere with API routes
     if full_path.startswith("api/"):
-        raise HTTPException(status_code=404, detail="Not found")
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+
+    if full_path.endswith(('.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot')):
+        file_path = os.path.join(static_dir, full_path)
+        if os.path.exists(file_path):
+            return FileResponse(file_path)
     
-    # Serve index.html for all other routes (React Router will handle routing)
-    static_dir = os.path.join(os.path.dirname(__file__), "static")
     index_file = os.path.join(static_dir, "index.html")
-    
     if os.path.exists(index_file):
         return FileResponse(index_file)
     else:
-        raise HTTPException(status_code=404, detail="Frontend not found")
+        raise HTTPException(status_code=404, detail="App not found")
 
 if __name__=="__main__":
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
