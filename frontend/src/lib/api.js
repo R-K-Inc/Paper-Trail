@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || ''
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -15,7 +15,6 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // We just pass the error along.
     return Promise.reject(error)
   }
 )
